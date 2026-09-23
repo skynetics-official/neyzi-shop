@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeyziShop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #090c15;
+  --bg-card: #131826;
+  --bg-card-hover: #1a2033;
+  --panel: #111625;
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --line: #222a3d;
+  --text: #f3f5f9;
+  --muted: #8e9aaf;
+  --accent: #7c5cff;
+  --accent-hover: #9174ff;
+  --accent-glow: rgba(124, 92, 255, 0.25);
+  --ok: #20c997;
+  --ok-bg: rgba(32, 201, 151, 0.12);
+  --bad: #ff4d6d;
+  --bad-bg: rgba(255, 77, 109, 0.12);
+  --warn: #ffb703;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(circle at 15% 10%, rgba(124, 92, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(32, 201, 151, 0.08), transparent 40%);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap {
+  max-width: 1140px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  flex: 1;
+}
+
+/* Header & Nav */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: rgba(17, 22, 37, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  margin-bottom: 28px;
+  position: sticky;
+  top: 12px;
+  z-index: 100;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.brand span { color: var(--accent); }
+
+.nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+button, .btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+}
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-danger {
+  background: var(--bad-bg);
+  color: var(--bad);
+  border: 1px solid rgba(255, 77, 109, 0.2);
+}
+.btn-danger:hover {
+  background: var(--bad);
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.nav-tab {
+  background: transparent;
+  color: var(--muted);
+  border-radius: 10px;
+  padding: 8px 14px;
+}
+.nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-tab.active { color: var(--text); background: var(--bg-card); border: 1px solid var(--panel-border); }
+
+/* Hero & Section Panels */
+.hero {
+  background: linear-gradient(135deg, rgba(25, 31, 50, 0.8), rgba(17, 22, 37, 0.9));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.hero-text h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+.hero-text p { color: var(--muted); font-size: 15px; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.stat-card .label { color: var(--muted); font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+.stat-card .val { font-size: 26px; font-weight: 800; color: var(--text); }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.panel-head h2 { font-size: 20px; font-weight: 700; }
+
+/* Product Grid & Cards */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+.product-card:hover {
+  border-color: rgba(124, 92, 255, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.product-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  background: #0b0e17;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 32px;
+}
+
+.product-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.product-desc {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 16px;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.product-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.badge-ok { background: var(--ok-bg); color: var(--ok); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-warn { background: rgba(255, 183, 3, 0.12); color: var(--warn); }
+
+/* Forms & Inputs */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.field input, .field textarea, .field select {
+  width: 100%;
+  background: #0b0f17;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition);
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Auth Page */
+.auth {
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.authbox {
+  width: min(420px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* Tables / Rows */
+.row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  gap: 12px;
+}
+.row-item:last-child { margin-bottom: 0; }
+
+.code-pill {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  background: #0a0d16;
+  border: 1px dashed rgba(255,255,255,0.15);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  color: #a5b4fc;
+}
+
+/* Modal Window */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(5, 7, 13, 0.8);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition);
+}
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  width: min(520px, 92%);
+  padding: 28px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.95);
+  transition: var(--transition);
+}
+.modal-overlay.show .modal { transform: scale(1); }
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 2000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: var(--transition);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 42px; margin-bottom: 10px; opacity: 0.6; }
+
+.hidden { display: none !important; }
+.small { font-size: 13px; color: var(--muted); }
+
+/* Responsive */
+@media (max-width: 640px) {
+  header { flex-direction: column; align-items: stretch; }
+  .nav { justify-content: space-between; }
+  .hero { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- Header -->
+  <header id="header" class="hidden">
+    <div class="brand" id="brandBtn">Neyzi<span>Shop</span></div>
+    <div class="nav">
+      <button class="nav-tab active" id="tabShop">🛒 Магазин</button>
+      <button class="nav-tab" id="tabPromo">🎁 Промокод</button>
+      <button class="nav-tab" id="tabHistory">📜 История</button>
+      <button class="btn btn-secondary hidden" id="adminBtn">🛠️ Админка</button>
+      <button class="btn btn-secondary" id="logoutBtn">Выйти</button>
+    </div>
+  </header>
+
+  <!-- Auth View -->
+  <section id="auth" class="auth">
+    <div class="authbox">
+      <div class="brand" style="justify-content:center; margin-bottom:20px;">Neyzi<span>Shop</span></div>
+      <h2 id="authTitle" style="text-align:center; margin-bottom:8px;">Вход</h2>
+      <p class="small" id="authSub" style="text-align:center; margin-bottom:24px;">Войдите в свой аккаунт NeyziShop</p>
+      
+      <div class="field">
+        <label>Email адрес</label>
+        <input id="email" type="email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>Пароль</label>
+        <input id="password" type="password" placeholder="••••••••">
+      </div>
+      
+      <button class="btn btn-primary" style="width:100%; margin-top:8px;" id="authAction">Войти</button>
+      <button class="btn btn-secondary" style="width:100%; margin-top:10px;" id="switchAuth">Создать аккаунт</button>
+    </div>
+  </section>
+
+  <!-- Main View -->
+  <main id="app" class="hidden">
+    
+    <!-- Player Hero Stats -->
+    <div class="hero">
+      <div class="hero-text">
+        <h1 id="welcomeUser">Добро пожаловать!</h1>
+        <p>Выбирайте товары и пополняйте баланс по промокодам</p>
+      </div>
+      <div style="display:flex; gap:16px;">
+        <div class="stat-card" style="min-width: 180px;">
+          <div class="label">Твой баланс</div>
+          <div class="val" id="playerBalance">0 ₴</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 1: Shop -->
+    <section id="viewShop">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Витрина товаров</h2>
+        </div>
+        <div id="productsGrid" class="products-grid">
+          <!-- Products render here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Promo -->
+    <section id="viewPromo" class="hidden">
+      <div class="panel" style="max-width: 500px; margin: 0 auto;">
+        <h2>Активация промокода</h2>
+        <p class="small" style="margin-bottom: 20px;">Введите секретный код для моментального пополнения баланса</p>
+        <div class="field">
+          <input id="promoInput" style="text-transform: uppercase;" placeholder="НАПР. FRIEND500">
+        </div>
+        <button class="btn btn-primary" style="width:100%;" id="redeemBtn">Активировать код</button>
+      </div>
+    </section>
+
+    <!-- Tab 3: History -->
+    <section id="viewHistory" class="hidden">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>История операций и покупок</h2>
+        </div>
+        <div id="historyList">
+          <!-- Transactions render here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Admin Panel -->
+    <section id="viewAdmin" class="hidden">
+      <div class="hero" style="background: linear-gradient(135deg, rgba(124, 92, 255, 0.15), rgba(17, 22, 37, 0.9));">
+        <div>
+          <h1>Панель Администратора</h1>
+          <p>Управление товарами, кодами и игроками</p>
+        </div>
+        <button class="btn btn-secondary" id="exitAdminBtn">← В магазин</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="label">Всего игроков</div><div class="val" id="statUsers">0</div></div>
+        <div class="stat-card"><div class="label">Товаров в базе</div><div class="val" id="statProducts">0</div></div>
+        <div class="stat-card"><div class="label">Промокодов</div><div class="val" id="statCodes">0</div></div>
+      </div>
+
+      <!-- Admin Navigation Sub-tabs -->
+      <div class="nav" style="margin-bottom: 20px;">
+        <button class="nav-tab active" id="admTabProd">🛍️ Товары</button>
+        <button class="nav-tab" id="admTabPromo">🎟️ Промокоды</button>
+        <button class="nav-tab" id="admTabUsers">👥 Пользователи</button>
+      </div>
+
+      <!-- Admin: Products -->
+      <div id="admSecProd" class="panel">
+        <div class="panel-head">
+          <h2>Управление товарами</h2>
+          <button class="btn btn-primary btn-sm" id="btnOpenAddProduct">+ Добавить товар</button>
+        </div>
+        <div id="adminProductsList"></div>
+      </div>
+
+      <!-- Admin: Promos -->
+      <div id="admSecPromo" class="panel hidden">
+        <div class="panel-head">
+          <h2>Генератор и промокоды</h2>
+        </div>
+        <div class="field" style="background: var(--bg-card); padding:16px; border-radius: var(--radius-sm); margin-bottom: 20px;">
+          <h3 style="font-size:15px; margin-bottom: 12px;">Сгенерировать промокоды</h3>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px;">
+            <div class="field"><label>Количество</label>
+              <select id="genCount">
+                <option value="1">1 шт.</option>
+                <option value="10">10 шт.</option>
+                <option value="50">50 шт.</option>
+                <option value="100">100 шт.</option>
+              </select>
+            </div>
+            <div class="field"><label>Сумма (₴)</label><input id="genAmount" type="number" value="100" min="1"></div>
+            <div class="field"><label>Префикс (опц.)</label><input id="genPrefix" placeholder="GIFT"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnGenerateCodes" style="margin-top: 8px;">Сгенерировать</button>
+        </div>
+        <div id="adminCodesList"></div>
+      </div>
+
+      <!-- Admin: Users -->
+      <div id="admSecUsers" class="panel hidden">
+        <div class="panel-head">
+          <h2>Пользователи и балансы</h2>
+        </div>
+        <div id="adminUsersList"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Modal: Add/Edit Product -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalProductTitle">Добавить товар</h3>
+      <button class="btn btn-secondary btn-sm" id="closeProductModal">✕</button>
+    </div>
+    <form id="productForm">
+      <input type="hidden" id="prodId">
+      <div class="field">
+        <label>Название товара *</label>
+        <input id="prodTitle" required placeholder="Например: VIP статус">
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <div class="field">
+          <label>Цена (₴) *</label>
+          <input id="prodPrice" type="number" min="0" required placeholder="100">
+        </div>
+        <div class="field">
+          <label>В наличии (шт.) *</label>
+          <input id="prodStock" type="number" min="0" required placeholder="10">
+        </div>
+      </div>
+      <div class="field">
+        <label>Ссылка на фото (URL)</label>
+        <input id="prodImg" type="url" placeholder="https://example.com/image.png">
+      </div>
+      <div class="field">
+        <label>Описание</label>
+        <textarea id="prodDesc" rows="3" placeholder="Описание товара..."></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" class="btn btn-secondary" id="cancelProductModal">Отмена</button>
+        <button type="submit" class="btn btn-primary" id="saveProductBtn">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase Modular Script -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, query, where, orderBy, limit, runTransaction, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDZX77u5cWZvLeQ-TNhrCYd6YSXbPGMd7A",
+  authDomain: "neyzishop.firebaseapp.com",
+  projectId: "neyzishop",
+  storageBucket: "neyzishop.firebasestorage.app",
+  messagingSenderId: "782169963369",
+  appId: "1:782169963369:web:afd2eafb40156bb75fdbf8",
+  measurementId: "G-6DCWCJVJ5M"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+let isRegister = false;
+let currentUser = null;
+let currentUserData = null;
+
+// Helper Utilities
+function toast(msg) {
+  const x = $("toast");
+  x.textContent = msg;
+  x.classList.add("show");
+  setTimeout(() => x.classList.remove("show"), 2800);
+}
+
+function money(n) {
+  const num = Number(n);
+  return (isNaN(num) ? 0 : num).toLocaleString("uk-UA") + " ₴";
+}
+
+// Navigation Tabs Manager
+function switchTab(tab) {
+  ["Shop", "Promo", "History", "Admin"].forEach(t => {
+    const view = $("view" + t);
+    const btn = $("tab" + t);
+    if (view) view.classList.add("hidden");
+    if (btn) btn.classList.remove("active");
+  });
+
+  if (tab === "Admin") {
+    $("viewAdmin").classList.remove("hidden");
+    loadAdminData();
+  } else {
+    $("view" + tab).classList.remove("hidden");
+    const btn = $("tab" + tab);
+    if (btn) btn.classList.add("active");
+    if (tab === "Shop") loadProducts();
+    if (tab === "History") loadHistory();
+  }
+}
+
+$("tabShop").onclick = () => switchTab("Shop");
+$("tabPromo").onclick = () => switchTab("Promo");
+$("tabHistory").onclick = () => switchTab("History");
+$("adminBtn").onclick = () => switchTab("Admin");
+$("exitAdminBtn").onclick = () => switchTab("Shop");
+$("brandBtn").onclick = () => switchTab("Shop");
+
+// Auth Handlers
+function setAuthMode() {
+  $("authTitle").textContent = isRegister ? "Регистрация" : "Вход";
+  $("authSub").textContent = isRegister ? "Создайте аккаунт NeyziShop" : "Войдите в свой аккаунт NeyziShop";
+  $("authAction").textContent = isRegister ? "Зарегистрироваться" : "Войти";
+  $("switchAuth").textContent = isRegister ? "Уже есть аккаунт? Войти" : "Создать аккаунт";
+}
+
+$("switchAuth").onclick = () => { isRegister = !isRegister; setAuthMode(); };
+
+$("authAction").onclick = async () => {
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  if (!email || password.length < 6) return toast("Введите email и пароль от 6 символов");
+  
+  try {
+    if (isRegister) {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "users", cred.user.uid), {
+        name: email.split("@")[0],
+        role: "player",
+        balance: 0,
+        createdAt: serverTimestamp()
+      });
+      toast("Аккаунт успешно создан!");
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  } catch (e) {
+    toast(e.code?.replace("auth/", "") || e.message);
+  }
+};
+
+$("logoutBtn").onclick = () => signOut(auth);
+
+// User Profile Loader
+async function fetchMe() {
+  if (!currentUser) return null;
+  const s = await getDoc(doc(db, "users", currentUser.uid));
+  if (s.exists()) {
+    currentUserData = s.data();
+    $("playerBalance").textContent = money(currentUserData.balance);
+    $("welcomeUser").textContent = `Привет, ${currentUserData.name || currentUser.email.split('@')[0]}!`;
+    $("adminBtn").classList.toggle("hidden", currentUserData.role !== "admin");
+    return currentUserData;
+  }
+  return null;
+}
+
+// 1. PRODUCTS SHOP SYSTEM
+async function loadProducts() {
+  const grid = $("productsGrid");
+  try {
+    const ss = await getDocs(collection(db, "products"));
+    if (ss.empty) {
+      grid.innerHTML = `<div class="empty" style="grid-column: 1/-1;">
+        <div class="empty-icon">🛍️</div>
+        <h3>Магазин пока пуст</h3>
+        <p>Администратор еще не добавил товары</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = ss.docs.map(d => {
+      const p = d.data();
+      const stock = Number(p.stock || 0);
+      const isAvailable = stock > 0;
+      return `
+        <div class="product-card">
+          ${p.imageUrl 
+            ? `<img src="${p.imageUrl}" class="product-img" alt="${p.title}" onerror="this.style.display='none'">` 
+            : `<div class="product-img">📦</div>`}
+          <div class="product-body">
+            <div class="product-title">${p.title}</div>
+            <div class="product-desc">${p.description || "Описание отсутствует"}</div>
+            <div style="margin-bottom: 12px;">
+              ${isAvailable 
+                ? `<span class="badge badge-ok">В наличии: ${stock} шт.</span>` 
+                : `<span class="badge badge-bad">Нет в наличии</span>`}
+            </div>
+            <div class="product-meta">
+              <div class="product-price">${money(p.price)}</div>
+              <button class="btn btn-primary btn-sm" 
+                ${!isAvailable ? 'disabled' : ''} 
+                onclick="window.buyProduct('${d.id}')">
+                ${isAvailable ? 'Купить' : 'Продано'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch(e) {
+    grid.innerHTML = `<div class="empty" style="grid-column: 1/-1;">Ошибка загрузки товаров: ${e.message}</div>`;
+  }
+}
+
+window.buyProduct = async (prodId) => {
+  if (!currentUser) return toast("Сначала авторизуйтесь");
+  const userRef = doc(db, "users", currentUser.uid);
+  const prodRef = doc(db, "products", prodId);
+  const txRef = doc(collection(db, "transactions"));
+
+  try {
+    await runTransaction(db, async (t) => {
+      const [uSnap, pSnap] = await Promise.all([t.get(userRef), t.get(prodRef)]);
+      if (!pSnap.exists()) throw new Error("Товар не найден");
+      if (!uSnap.exists()) throw new Error("Пользователь не найден");
+
+      const u = uSnap.data();
+      const p = pSnap.data();
+
+      const price = Number(p.price || 0);
+      const stock = Number(p.stock || 0);
+      const balance = Number(u.balance || 0);
+
+      if (stock <= 0) throw new Error("Товар закончился!");
+      if (balance < price) throw new Error("Недостаточно средств на балансе!");
+
+      t.update(userRef, { balance: balance - price });
+      t.update(prodRef, { stock: stock - 1 });
+      t.set(txRef, {
+        userId: currentUser.uid,
+        amount: -price,
+        text: `Покупка: ${p.title}`,
+        productId: prodId,
+        createdAt: serverTimestamp()
+      });
+    });
+
+    toast("Покупка успешно совершена!");
+    await fetchMe();
+    loadProducts();
+  } catch(e) {
+    toast(e.message || "Ошибка при совершении покупки");
+  }
+};
+
+// 2. PROMOCODE REDEEM
+$("redeemBtn").onclick = async () => {
+  const code = $("promoInput").value.trim().toUpperCase();
+  if (!code) return toast("Введите промокод");
+
+  const promoRef = doc(db, "promoCodes", code);
+  const userRef = doc(db, "users", currentUser.uid);
+  const txRef = doc(collection(db, "transactions"));
+
+  try {
+    await runTransaction(db, async (t) => {
+      const [pSnap, uSnap] = await Promise.all([t.get(promoRef), t.get(userRef)]);
+      if (!pSnap.exists()) throw new Error("Промокод не существует");
+      
+      const p = pSnap.data();
+      if (p.used || p.status === "disabled" || p.status === "used") {
+        throw new Error("Промокод уже недействителен");
+      }
+
+      const amount = Number(p.amount || 0);
+      const u = uSnap.data();
+
+      t.update(userRef, { balance: Number(u.balance || 0) + amount });
+      t.update(promoRef, { 
+        used: true, 
+        status: "used", 
+        usedBy: currentUser.uid, 
+        usedAt: serverTimestamp() 
+      });
+      t.set(txRef, {
+        userId: currentUser.uid,
+        amount: amount,
+        text: `Пополнение по промокоду`,
+        code: code,
+        createdAt: serverTimestamp()
+      });
+    });
+
+    $("promoInput").value = "";
+    toast("Промокод успешно активирован!");
+    await fetchMe();
+  } catch (e) {
+    toast(e.message || "Не удалось активировать промокод");
+  }
+};
+
+// 3. HISTORY SYSTEM
+async function loadHistory() {
+  const container = $("historyList");
+  try {
+    const q = query(
+      collection(db, "transactions"),
+      where("userId", "==", currentUser.uid),
+      orderBy("createdAt", "desc"),
+      limit(50)
+    );
+    const ss = await getDocs(q);
+    if (ss.empty) {
+      container.innerHTML = `<div class="empty">У вас пока нет транзакций</div>`;
+      return;
+    }
+
+    container.innerHTML = ss.docs.map(d => {
+      const x = d.data();
+      const amt = Number(x.amount || 0);
+      const dateStr = x.createdAt?.toDate ? x.createdAt.toDate().toLocaleString("uk-UA") : "Только что";
+      return `
+        <div class="row-item">
+          <div>
+            <div style="font-weight:700;">${x.text || "Операция"}</div>
+            <div class="small">${dateStr} ${x.code ? `• Код: <span class="code-pill">${x.code}</span>` : ''}</div>
+          </div>
+          <div style="font-weight:800; color: ${amt >= 0 ? 'var(--ok)' : 'var(--text)'};">
+            ${amt >= 0 ? '+' : ''}${money(amt)}
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch(e) {
+    container.innerHTML = `<div class="empty">Не удалось загрузить историю.</div>`;
+  }
+}
+
+// 4. ADMIN PANEL MANAGEMENT
+function initAdminTabs() {
+  const tabs = [
+    { btn: "admTabProd", sec: "admSecProd" },
+    { btn: "admTabPromo", sec: "admSecPromo" },
+    { btn: "admTabUsers", sec: "admSecUsers" }
+  ];
+  tabs.forEach(t => {
+    $(t.btn).onclick = () => {
+      tabs.forEach(x => {
+        $(x.btn).classList.remove("active");
+        $(x.sec).classList.add("hidden");
+      });
+      $(t.btn).classList.add("active");
+      $(t.sec).classList.remove("hidden");
+    };
+  });
+}
+initAdminTabs();
+
+async function loadAdminData() {
+  // Stat counters
+  const [usersSnap, prodSnap, promoSnap] = await Promise.all([
+    getDocs(collection(db, "users")),
+    getDocs(collection(db, "products")),
+    getDocs(collection(db, "promoCodes"))
+  ]);
+
+  $("statUsers").textContent = usersSnap.size;
+  $("statProducts").textContent = prodSnap.size;
+  $("statCodes").textContent = promoSnap.size;
+
+  // Render Admin Products
+  const prodList = $("adminProductsList");
+  prodList.innerHTML = prodSnap.empty ? `<div class="empty">Товаров нет</div>` : prodSnap.docs.map(d => {
+    const p = d.data();
+    return `
+      <div class="row-item">
+        <div>
+          <strong>${p.title}</strong> — ${money(p.price)}
+          <div class="small">В наличии: ${p.stock} шт.</div>
+        </div>
+        <div>
+          <button class="btn btn-secondary btn-sm" onclick="window.editProduct('${d.id}')">Изменить</button>
+          <button class="btn btn-danger btn-sm" onclick="window.deleteProduct('${d.id}')">Удалить</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Render Admin Promos
+  const codesList = $("adminCodesList");
+  codesList.innerHTML = promoSnap.empty ? `<div class="empty">Промокодов нет</div>` : promoSnap.docs.map(d => {
+    const c = d.data();
+    const isUsed = c.used || c.status === "used";
+    return `
+      <div class="row-item">
+        <div>
+          <span class="code-pill">${d.id}</span> — <strong>${money(c.amount)}</strong>
+          <div class="small">Статус: ${isUsed ? '<span style="color:var(--bad)">Использован</span>' : '<span style="color:var(--ok)">Активен</span>'}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Render Admin Users
+  const usersList = $("adminUsersList");
+  usersList.innerHTML = usersSnap.docs.map(d => {
+    const u = d.data();
+    return `
+      <div class="row-item">
+        <div>
+          <strong>${u.name || d.id}</strong> (${u.role || 'player'})
+          <div class="small">${d.id}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <strong>${money(u.balance)}</strong>
+          <button class="btn btn-secondary btn-sm" onclick="window.changeBalance('${d.id}')">Баланс</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// Product Modal & CRUD
+const modal = $("productModal");
+$("btnOpenAddProduct").onclick = () => {
+  $("modalProductTitle").textContent = "Добавить товар";
+  $("prodId").value = "";
+  $("productForm").reset();
+  modal.classList.add("show");
+};
+$("closeProductModal").onclick = $("cancelProductModal").onclick = () => modal.classList.remove("show");
+
+$("productForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const id = $("prodId").value;
+  const payload = {
+    title: $("prodTitle").value.trim(),
+    price: Number($("prodPrice").value),
+    stock: Number($("prodStock").value),
+    imageUrl: $("prodImg").value.trim(),
+    description: $("prodDesc").value.trim(),
+    updatedAt: serverTimestamp()
+  };
+
+  try {
+    if (id) {
+      await updateDoc(doc(db, "products", id), payload);
+      toast("Товар обновлен");
+    } else {
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db, "products"), payload);
+      toast("Товар добавлен");
+    }
+    modal.classList.remove("show");
+    loadAdminData();
+  } catch(e) {
+    toast("Ошибка: " + e.message);
+  }
+};
+
+window.editProduct = async (id) => {
+  const snap = await getDoc(doc(db, "products", id));
+  if (!snap.exists()) return;
+  const p = snap.data();
+  $("prodId").value = id;
+  $("prodTitle").value = p.title || "";
+  $("prodPrice").value = p.price || 0;
+  $("prodStock").value = p.stock || 0;
+  $("prodImg").value = p.imageUrl || "";
+  $("prodDesc").value = p.description || "";
+  $("modalProductTitle").textContent = "Редактировать товар";
+  modal.classList.add("show");
+};
+
+window.deleteProduct = async (id) => {
+  if (!confirm("Вы уверены, что хотите удалить этот товар?")) return;
+  try {
+    await deleteDoc(doc(db, "products", id));
+    toast("Товар удален");
+    loadAdminData();
+  } catch(e) { toast("Ошибка удаления: " + e.message); }
+};
+
+// Admin Promo Generator
+$("btnGenerateCodes").onclick = async () => {
+  const count = Number($("genCount").value);
+  const amount = Number($("genAmount").value);
+  const prefix = $("genPrefix").value.trim().toUpperCase();
+
+  if (isNaN(amount) || amount <= 0) return toast("Укажите корректную сумму");
+
+  try {
+    for (let i = 0; i < count; i++) {
+      const randStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const code = (prefix ? prefix + "-" : "") + randStr;
+      await setDoc(doc(db, "promoCodes", code), {
+        amount: amount,
+        used: false,
+        status: "active",
+        createdBy: currentUser.uid,
+        createdAt: serverTimestamp()
+      });
+    }
+    toast(`Успешно сгенерировано ${count} кодов!`);
+    loadAdminData();
+  } catch(e) {
+    toast("Ошибка генерации: " + e.message);
+  }
+};
+
+// Admin Change Balance
+window.changeBalance = async (uid) => {
+  const val = prompt("Введите сумму для изменения баланса (например 500 или -200):");
+  if (val === null) return;
+  const amount = Number(val);
+  if (!Number.isFinite(amount)) return toast("Некорректная сумма");
+
+  try {
+    const userRef = doc(db, "users", uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) return;
+
+    const currentBal = Number(snap.data().balance || 0);
+    await updateDoc(userRef, { balance: currentBal + amount });
+    await addDoc(collection(db, "transactions"), {
+      userId: uid,
+      amount: amount,
+      text: "Изменение администратором",
+      adminId: currentUser.uid,
+      createdAt: serverTimestamp()
+    });
+
+    toast("Баланс пользователя обновлен");
+    loadAdminData();
+  } catch(e) {
+    toast("Ошибка: " + e.message);
+  }
+};
+
+// Global Auth Listener
+onAuthStateChanged(auth, async u => {
+  currentUser = u;
+  if (!u) {
+    $("auth").classList.remove("hidden");
+    $("header").classList.add("hidden");
+    $("app").classList.add("hidden");
+    return;
+  }
+
+  $("auth").classList.add("hidden");
+  $("header").classList.remove("hidden");
+  $("app").classList.remove("hidden");
+
+  let me = await fetchMe();
+  if (!me) {
+    await setDoc(doc(db, "users", u.uid), {
+      name: u.email.split("@")[0],
+      role: "player",
+      balance: 0,
+      createdAt: serverTimestamp()
+    });
+    await fetchMe();
+  }
+
+  switchTab("Shop");
+});
+
+setAuthMode();
+</script>
+</body>
+</html>
