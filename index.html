@@ -25,6 +25,7 @@
   --bad: #ff4d6d;
   --bad-bg: rgba(255, 77, 109, 0.12);
   --warn: #ffb703;
+  --warn-bg: rgba(255, 183, 3, 0.12);
   --radius: 16px;
   --radius-sm: 10px;
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -152,7 +153,7 @@ button, .btn {
 .nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
 .nav-tab.active { color: var(--text); background: var(--bg-card); border: 1px solid var(--panel-border); }
 
-/* Hero & Section Panels */
+/* Hero & Panels */
 .hero {
   background: linear-gradient(135deg, rgba(25, 31, 50, 0.8), rgba(17, 22, 37, 0.9));
   border: 1px solid var(--panel-border);
@@ -199,7 +200,7 @@ button, .btn {
 }
 .panel-head h2 { font-size: 20px; font-weight: 700; }
 
-/* Product Grid & Cards */
+/* Product Grid */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -281,9 +282,9 @@ button, .btn {
 }
 .badge-ok { background: var(--ok-bg); color: var(--ok); }
 .badge-bad { background: var(--bad-bg); color: var(--bad); }
-.badge-warn { background: rgba(255, 183, 3, 0.12); color: var(--warn); }
+.badge-warn { background: var(--warn-bg); color: var(--warn); }
 
-/* Forms & Inputs */
+/* Forms & Chat UI */
 .field {
   display: flex;
   flex-direction: column;
@@ -308,6 +309,37 @@ button, .btn {
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+.chat-box {
+  background: #0b0f17;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  height: 240px;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.chat-msg {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.chat-msg.admin {
+  background: rgba(124, 92, 255, 0.2);
+  border: 1px solid rgba(124, 92, 255, 0.4);
+  align-self: flex-start;
+}
+.chat-msg.user {
+  background: #1e2638;
+  border: 1px solid var(--line);
+  align-self: flex-end;
+}
+.chat-msg .sender { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
+
 /* Auth Page */
 .auth {
   min-height: 75vh;
@@ -324,7 +356,7 @@ button, .btn {
   box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
-/* Tables / Rows */
+/* Rows */
 .row-item {
   display: flex;
   align-items: center;
@@ -336,7 +368,6 @@ button, .btn {
   margin-bottom: 10px;
   gap: 12px;
 }
-.row-item:last-child { margin-bottom: 0; }
 
 .code-pill {
   font-family: ui-monospace, SFMono-Regular, monospace;
@@ -348,7 +379,7 @@ button, .btn {
   color: #a5b4fc;
 }
 
-/* Modal Window */
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -409,7 +440,6 @@ button, .btn {
 .hidden { display: none !important; }
 .small { font-size: 13px; color: var(--muted); }
 
-/* Responsive */
 @media (max-width: 640px) {
   header { flex-direction: column; align-items: stretch; }
   .nav { justify-content: space-between; }
@@ -426,7 +456,7 @@ button, .btn {
     <div class="nav">
       <button class="nav-tab active" id="tabShop">🛒 Магазин</button>
       <button class="nav-tab" id="tabPromo">🎁 Промокод</button>
-      <button class="nav-tab" id="tabHistory">📜 История</button>
+      <button class="nav-tab" id="tabHistory">📜 История и Покупки</button>
       <button class="btn btn-secondary hidden" id="adminBtn">🛠️ Админка</button>
       <button class="btn btn-secondary" id="logoutBtn">Выйти</button>
     </div>
@@ -456,7 +486,7 @@ button, .btn {
   <!-- Main View -->
   <main id="app" class="hidden">
     
-    <!-- Player Hero Stats -->
+    <!-- Player Hero -->
     <div class="hero">
       <div class="hero-text">
         <h1 id="welcomeUser">Добро пожаловать!</h1>
@@ -476,9 +506,7 @@ button, .btn {
         <div class="panel-head">
           <h2>Витрина товаров</h2>
         </div>
-        <div id="productsGrid" class="products-grid">
-          <!-- Products render here -->
-        </div>
+        <div id="productsGrid" class="products-grid"></div>
       </div>
     </section>
 
@@ -498,11 +526,14 @@ button, .btn {
     <section id="viewHistory" class="hidden">
       <div class="panel">
         <div class="panel-head">
-          <h2>История операций и покупок</h2>
+          <h2>Мои покупки и заказы</h2>
         </div>
-        <div id="historyList">
-          <!-- Transactions render here -->
+        <div id="ordersList" style="margin-bottom: 30px;"></div>
+        
+        <div class="panel-head" style="margin-top: 20px;">
+          <h2>История баланса</h2>
         </div>
+        <div id="historyList"></div>
       </div>
     </section>
 
@@ -511,26 +542,35 @@ button, .btn {
       <div class="hero" style="background: linear-gradient(135deg, rgba(124, 92, 255, 0.15), rgba(17, 22, 37, 0.9));">
         <div>
           <h1>Панель Администратора</h1>
-          <p>Управление товарами, кодами и игроками</p>
+          <p>Управление товарами, выдачей и пользователями</p>
         </div>
         <button class="btn btn-secondary" id="exitAdminBtn">← В магазин</button>
       </div>
 
       <div class="stats-grid">
+        <div class="stat-card"><div class="label">Ожидают выдачи</div><div class="val" id="statPendingOrders" style="color:var(--warn)">0</div></div>
         <div class="stat-card"><div class="label">Всего игроков</div><div class="val" id="statUsers">0</div></div>
         <div class="stat-card"><div class="label">Товаров в базе</div><div class="val" id="statProducts">0</div></div>
-        <div class="stat-card"><div class="label">Промокодов</div><div class="val" id="statCodes">0</div></div>
       </div>
 
-      <!-- Admin Navigation Sub-tabs -->
+      <!-- Admin Sub-tabs -->
       <div class="nav" style="margin-bottom: 20px;">
-        <button class="nav-tab active" id="admTabProd">🛍️ Товары</button>
+        <button class="nav-tab active" id="admTabOrders">📦 Заказы на выдачу</button>
+        <button class="nav-tab" id="admTabProd">🛍️ Товары</button>
         <button class="nav-tab" id="admTabPromo">🎟️ Промокоды</button>
         <button class="nav-tab" id="admTabUsers">👥 Пользователи</button>
       </div>
 
+      <!-- Admin: Orders -->
+      <div id="admSecOrders" class="panel">
+        <div class="panel-head">
+          <h2>Заказы игроков (Выдача товаров)</h2>
+        </div>
+        <div id="adminOrdersList"></div>
+      </div>
+
       <!-- Admin: Products -->
-      <div id="admSecProd" class="panel">
+      <div id="admSecProd" class="panel hidden">
         <div class="panel-head">
           <h2>Управление товарами</h2>
           <button class="btn btn-primary btn-sm" id="btnOpenAddProduct">+ Добавить товар</button>
@@ -572,6 +612,51 @@ button, .btn {
     </section>
 
   </main>
+</div>
+
+<!-- Modal: Buy Product -->
+<div class="modal-overlay" id="buyModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Оформление покупки</h3>
+      <button class="btn btn-secondary btn-sm" id="closeBuyModal">✕</button>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <h4 id="buyModalTitle" style="font-size:18px; color:var(--accent);">Название товара</h4>
+      <p id="buyModalPrice" style="font-weight: 700; margin-top: 4px;">Цена: 0 ₴</p>
+    </div>
+    <div style="background: rgba(124, 92, 255, 0.1); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; font-size: 13px;">
+      📌 <b>Инструкция:</b> Укажите свой Nickname. Вы сможете написать админу в чате заказа после покупки!
+    </div>
+    <div class="field">
+      <label>Ваш Nickname в Roblox / Игре / Telegram *</label>
+      <input id="buyUserNickname" placeholder="Например: CoolRobloxPlayer123" required>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button class="btn btn-secondary" id="cancelBuyModal">Отмена</button>
+      <button class="btn btn-primary" id="confirmBuyBtn">Подтвердить покупку</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Order Chat Window -->
+<div class="modal-overlay" id="chatModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3 id="chatModalTitle">Чат по заказу</h3>
+        <p class="small" id="chatModalSub">Сообщения с администратором</p>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="closeChatModal">✕</button>
+    </div>
+    
+    <div id="chatMessagesBox" class="chat-box"></div>
+    
+    <div style="display:flex; gap:8px;">
+      <input id="chatInputText" placeholder="Напишите сообщение..." style="flex:1; background:#0b0f17; border:1px solid var(--line); padding:10px; border-radius:var(--radius-sm); color:white; outline:none;">
+      <button class="btn btn-primary" id="sendChatMessageBtn">Отправить</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal: Add/Edit Product -->
@@ -619,7 +704,7 @@ button, .btn {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, query, where, orderBy, limit, runTransaction, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, query, where, orderBy, limit, runTransaction, serverTimestamp, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDZX77u5cWZvLeQ-TNhrCYd6YSXbPGMd7A",
@@ -639,6 +724,8 @@ const $ = id => document.getElementById(id);
 let isRegister = false;
 let currentUser = null;
 let currentUserData = null;
+let currentSelectedProduct = null;
+let activeChatOrderId = null;
 
 // Helper Utilities
 function toast(msg) {
@@ -765,7 +852,7 @@ async function loadProducts() {
               <div class="product-price">${money(p.price)}</div>
               <button class="btn btn-primary btn-sm" 
                 ${!isAvailable ? 'disabled' : ''} 
-                onclick="window.buyProduct('${d.id}')">
+                onclick="window.openBuyModal('${d.id}', '${p.title.replace(/'/g, "\\'")}', ${p.price})">
                 ${isAvailable ? 'Купить' : 'Продано'}
               </button>
             </div>
@@ -778,11 +865,27 @@ async function loadProducts() {
   }
 }
 
-window.buyProduct = async (prodId) => {
+window.openBuyModal = (prodId, title, price) => {
   if (!currentUser) return toast("Сначала авторизуйтесь");
+  currentSelectedProduct = { id: prodId, title, price };
+  $("buyModalTitle").textContent = title;
+  $("buyModalPrice").textContent = `Цена: ${money(price)}`;
+  $("buyUserNickname").value = "";
+  $("buyModal").classList.add("show");
+};
+
+$("closeBuyModal").onclick = $("cancelBuyModal").onclick = () => $("buyModal").classList.remove("show");
+
+$("confirmBuyBtn").onclick = async () => {
+  const nick = $("buyUserNickname").value.trim();
+  if (!nick) return toast("Введите ваш Nickname!");
+  if (!currentSelectedProduct) return;
+
+  const prodId = currentSelectedProduct.id;
   const userRef = doc(db, "users", currentUser.uid);
   const prodRef = doc(db, "products", prodId);
   const txRef = doc(collection(db, "transactions"));
+  const orderRef = doc(collection(db, "orders"));
 
   try {
     await runTransaction(db, async (t) => {
@@ -802,6 +905,7 @@ window.buyProduct = async (prodId) => {
 
       t.update(userRef, { balance: balance - price });
       t.update(prodRef, { stock: stock - 1 });
+      
       t.set(txRef, {
         userId: currentUser.uid,
         amount: -price,
@@ -809,9 +913,24 @@ window.buyProduct = async (prodId) => {
         productId: prodId,
         createdAt: serverTimestamp()
       });
+
+      t.set(orderRef, {
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        gameNickname: nick,
+        productId: prodId,
+        productTitle: p.title,
+        price: price,
+        status: "pending",
+        chatMessages: [
+          { sender: "Система", text: `Заказ создан! Игровой ник: ${nick}`, time: new Date().toLocaleTimeString() }
+        ],
+        createdAt: serverTimestamp()
+      });
     });
 
-    toast("Покупка успешно совершена!");
+    $("buyModal").classList.remove("show");
+    toast("Покупка оформлена! Администратор выдаст вам товар.");
     await fetchMe();
     loadProducts();
   } catch(e) {
@@ -865,23 +984,62 @@ $("redeemBtn").onclick = async () => {
   }
 };
 
-// 3. HISTORY SYSTEM
+// 3. HISTORY & ORDER CHAT
 async function loadHistory() {
-  const container = $("historyList");
+  const ordersContainer = $("ordersList");
+  const txContainer = $("historyList");
+
   try {
-    const q = query(
+    const qOrders = query(
+      collection(db, "orders"),
+      where("userId", "==", currentUser.uid),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+    const oSnap = await getDocs(qOrders);
+    if (oSnap.empty) {
+      ordersContainer.innerHTML = `<div class="empty">У вас пока нет купленных товаров</div>`;
+    } else {
+      ordersContainer.innerHTML = oSnap.docs.map(d => {
+        const o = d.data();
+        const statusBadge = o.status === "completed" 
+          ? `<span class="badge badge-ok">✅ Выдано</span>`
+          : o.status === "cancelled"
+          ? `<span class="badge badge-bad">❌ Отменено</span>`
+          : `<span class="badge badge-warn">⏳ Ожидает выдачи</span>`;
+
+        return `
+          <div class="row-item">
+            <div>
+              <strong style="font-size:16px;">${o.productTitle}</strong> — <strong>${money(o.price)}</strong>
+              <div class="small" style="margin-top:4px;">Игровой Nickname: <b style="color:var(--text);">${o.gameNickname}</b></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${statusBadge}
+              <button class="btn btn-secondary btn-sm" onclick="window.openOrderChat('${d.id}')">💬 Сообщения</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+  } catch(e) {
+    ordersContainer.innerHTML = `<div class="empty">Ошибка загрузки заказов</div>`;
+  }
+
+  try {
+    const qTx = query(
       collection(db, "transactions"),
       where("userId", "==", currentUser.uid),
       orderBy("createdAt", "desc"),
-      limit(50)
+      limit(30)
     );
-    const ss = await getDocs(q);
+    const ss = await getDocs(qTx);
     if (ss.empty) {
-      container.innerHTML = `<div class="empty">У вас пока нет транзакций</div>`;
+      txContainer.innerHTML = `<div class="empty">История операций пуста</div>`;
       return;
     }
 
-    container.innerHTML = ss.docs.map(d => {
+    txContainer.innerHTML = ss.docs.map(d => {
       const x = d.data();
       const amt = Number(x.amount || 0);
       const dateStr = x.createdAt?.toDate ? x.createdAt.toDate().toLocaleString("uk-UA") : "Только что";
@@ -898,13 +1056,75 @@ async function loadHistory() {
       `;
     }).join("");
   } catch(e) {
-    container.innerHTML = `<div class="empty">Не удалось загрузить историю.</div>`;
+    txContainer.innerHTML = `<div class="empty">Не удалось загрузить историю.</div>`;
   }
 }
+
+// Chat Functionality
+window.openOrderChat = async (orderId) => {
+  activeChatOrderId = orderId;
+  const snap = await getDoc(doc(db, "orders", orderId));
+  if (!snap.exists()) return;
+
+  const o = snap.data();
+  $("chatModalTitle").textContent = `Чат по заказу: ${o.productTitle}`;
+  $("chatModalSub").textContent = `Игрок: ${o.gameNickname} | Статус: ${o.status}`;
+  
+  renderChatMessages(o.chatMessages || []);
+  $("chatModal").classList.add("show");
+};
+
+function renderChatMessages(msgs) {
+  const box = $("chatMessagesBox");
+  if (!msgs || msgs.length === 0) {
+    box.innerHTML = `<div class="empty">Сообщений пока нет</div>`;
+    return;
+  }
+
+  box.innerHTML = msgs.map(m => {
+    const isAdmin = m.sender === "Админ" || m.role === "admin";
+    return `
+      <div class="chat-msg ${isAdmin ? 'admin' : 'user'}">
+        <div class="sender">${m.sender} [${m.time || ''}]</div>
+        <div>${m.text}</div>
+      </div>
+    `;
+  }).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+$("closeChatModal").onclick = () => $("chatModal").classList.remove("show");
+
+$("sendChatMessageBtn").onclick = async () => {
+  const txt = $("chatInputText").value.trim();
+  if (!txt || !activeChatOrderId) return;
+
+  const senderName = currentUserData?.role === "admin" ? "Админ" : (currentUserData?.name || "Игрок");
+  const msgObj = {
+    sender: senderName,
+    role: currentUserData?.role || "player",
+    text: txt,
+    time: new Date().toLocaleTimeString("uk-UA", { hour: '2-digit', minute: '2-digit' })
+  };
+
+  try {
+    const orderRef = doc(db, "orders", activeChatOrderId);
+    await updateDoc(orderRef, {
+      chatMessages: arrayUnion(msgObj)
+    });
+
+    $("chatInputText").value = "";
+    const snap = await getDoc(orderRef);
+    if (snap.exists()) renderChatMessages(snap.data().chatMessages || []);
+  } catch(e) {
+    toast("Не удалось отправить: " + e.message);
+  }
+};
 
 // 4. ADMIN PANEL MANAGEMENT
 function initAdminTabs() {
   const tabs = [
+    { btn: "admTabOrders", sec: "admSecOrders" },
     { btn: "admTabProd", sec: "admSecProd" },
     { btn: "admTabPromo", sec: "admSecPromo" },
     { btn: "admTabUsers", sec: "admSecUsers" }
@@ -923,16 +1143,46 @@ function initAdminTabs() {
 initAdminTabs();
 
 async function loadAdminData() {
-  // Stat counters
-  const [usersSnap, prodSnap, promoSnap] = await Promise.all([
+  const [usersSnap, prodSnap, promoSnap, ordersSnap] = await Promise.all([
     getDocs(collection(db, "users")),
     getDocs(collection(db, "products")),
-    getDocs(collection(db, "promoCodes"))
+    getDocs(collection(db, "promoCodes")),
+    getDocs(collection(db, "orders"))
   ]);
 
+  const pendingCount = ordersSnap.docs.filter(d => d.data().status === "pending").length;
+  $("statPendingOrders").textContent = pendingCount;
   $("statUsers").textContent = usersSnap.size;
   $("statProducts").textContent = prodSnap.size;
-  $("statCodes").textContent = promoSnap.size;
+
+  // Render Admin Orders
+  const ordersList = $("adminOrdersList");
+  ordersList.innerHTML = ordersSnap.empty ? `<div class="empty">Заказов пока нет</div>` : ordersSnap.docs.map(d => {
+    const o = d.data();
+    const isPending = o.status === "pending";
+    const dateStr = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString("uk-UA") : "";
+
+    return `
+      <div class="row-item" style="${isPending ? 'border-color:var(--warn); background: rgba(255,183,3,0.03);' : ''}">
+        <div>
+          <div style="font-size:16px;">🛍️ <strong>${o.productTitle}</strong> (${money(o.price)})</div>
+          <div style="margin-top:4px;">🎮 Никнейм: <b style="color:var(--accent); font-size:15px;">${o.gameNickname}</b></div>
+          <div class="small">Аккаунт: ${o.userEmail || o.userId} • ${dateStr}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="window.openOrderChat('${d.id}')">💬 Чат с игроком</button>
+          ${isPending ? `
+            <button class="btn btn-primary btn-sm" onclick="window.completeOrder('${d.id}')">Выдать ✅</button>
+            <button class="btn btn-danger btn-sm" onclick="window.cancelOrder('${d.id}', '${o.userId}',${o.price})">Отмена ❌</button>
+          ` : `
+            <span class="badge ${o.status === 'completed' ? 'badge-ok' : 'badge-bad'}">
+              ${o.status === 'completed' ? 'Выдано' : 'Отменено'}
+            </span>
+          `}
+        </div>
+      </div>
+    `;
+  }).join("");
 
   // Render Admin Products
   const prodList = $("adminProductsList");
@@ -985,6 +1235,37 @@ async function loadAdminData() {
     `;
   }).join("");
 }
+
+// Complete Order
+window.completeOrder = async (orderId) => {
+  try {
+    await updateDoc(doc(db, "orders", orderId), { status: "completed", completedAt: serverTimestamp() });
+    toast("Заказ отмечен как ВЫДАН!");
+    loadAdminData();
+  } catch(e) { toast("Ошибка: " + e.message); }
+};
+
+// Cancel Order & Refund
+window.cancelOrder = async (orderId, userId, price) => {
+  if (!confirm("Отменить заказ и вернуть деньги игроку?")) return;
+  try {
+    const userRef = doc(db, "users", userId);
+    const uSnap = await getDoc(userRef);
+    if (uSnap.exists()) {
+      const currentBal = Number(uSnap.data().balance || 0);
+      await updateDoc(userRef, { balance: currentBal + Number(price) });
+      await addDoc(collection(db, "transactions"), {
+        userId,
+        amount: Number(price),
+        text: "Возврат средств за отмененный заказ",
+        createdAt: serverTimestamp()
+      });
+    }
+    await updateDoc(doc(db, "orders", orderId), { status: "cancelled", cancelledAt: serverTimestamp() });
+    toast("Заказ отменен, деньги возвращены игроку");
+    loadAdminData();
+  } catch(e) { toast("Ошибка: " + e.message); }
+};
 
 // Product Modal & CRUD
 const modal = $("productModal");
