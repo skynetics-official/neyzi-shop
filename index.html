@@ -657,7 +657,10 @@ button, .btn {
         <h3 id="chatModalTitle">Чат по заказу</h3>
         <p class="small" id="chatModalSub">Сообщения с администратором</p>
       </div>
-      <button class="btn btn-secondary btn-sm" id="closeChatModal">✕</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-danger btn-sm" id="closeOrderChatBtn">🔒 Закрыть чат</button>
+        <button class="btn btn-secondary btn-sm" id="closeChatModal">✕</button>
+      </div>
     </div>
     
     <div id="chatMessagesBox" class="chat-box"></div>
@@ -1017,6 +1020,8 @@ async function loadHistory() {
           ? `<span class="badge badge-ok">✅ Выдано</span>`
           : o.status === "cancelled"
           ? `<span class="badge badge-bad">❌ Отменено</span>`
+          : o.status === "closed"
+          ? `<span class="badge badge-bad">🔒 Чат закрыт</span>`
           : `<span class="badge badge-warn">⏳ Ожидает выдачи</span>`;
 
         return `
@@ -1081,6 +1086,13 @@ window.openOrderChat = (orderId) => {
     const o = snap.data();
     $("chatModalTitle").textContent = `Чат по заказу ${o.orderNum || ''}`;
     $("chatModalSub").textContent = `Товар: ${o.productTitle} | Игрок: ${o.gameNickname}`;
+
+    const isClosed = o.status === "closed" || o.status === "completed" || o.status === "cancelled";
+    $("chatInputText").disabled = isClosed;
+    $("sendChatMessageBtn").disabled = isClosed;
+    $("chatInputText").placeholder = isClosed ? "Чат закрыт" : "Напишите сообщение...";
+    $("closeOrderChatBtn").classList.toggle("hidden", isClosed);
+
     renderChatMessages(o.chatMessages || []);
   });
 
@@ -1109,6 +1121,26 @@ function renderChatMessages(msgs) {
 $("closeChatModal").onclick = () => {
   if (unsubscribeChat) unsubscribeChat();
   $("chatModal").classList.remove("show");
+};
+
+$("closeOrderChatBtn").onclick = async () => {
+  if (!activeChatOrderId) return;
+  if (!confirm("Вы уверены, что хотите закрыть чат по этому заказу?")) return;
+
+  try {
+    const orderRef = doc(db, "orders", activeChatOrderId);
+    await updateDoc(orderRef, {
+      status: "closed",
+      chatMessages: arrayUnion({
+        sender: "Система",
+        text: "🔒 Чат по заказу был закрыт.",
+        time: new Date().toLocaleTimeString("uk-UA", { hour: '2-digit', minute: '2-digit' })
+      })
+    });
+    toast("Чат успешно закрыт!");
+  } catch(e) {
+    toast("Ошибка закрытия: " + e.message);
+  }
 };
 
 $("sendChatMessageBtn").onclick = async () => {
@@ -1191,7 +1223,7 @@ async function loadAdminData() {
             <button class="btn btn-danger btn-sm" onclick="window.cancelOrder('${d.id}', '${o.userId}',${o.price})">Отмена ❌</button>
           ` : `
             <span class="badge ${o.status === 'completed' ? 'badge-ok' : 'badge-bad'}">
-              ${o.status === 'completed' ? 'Выдано' : 'Отменено'}
+              ${o.status === 'completed' ? 'Выдано' : o.status === 'closed' ? 'Закрыт' : 'Отменено'}
             </span>
           `}
         </div>
