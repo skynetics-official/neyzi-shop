@@ -200,7 +200,7 @@ button, .btn {
 }
 .panel-head h2 { font-size: 20px; font-weight: 700; }
 
-/* Product Grid */
+/* Product Grid & Discount Styling */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -214,12 +214,27 @@ button, .btn {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
   transition: var(--transition);
 }
 .product-card:hover {
   border-color: rgba(124, 92, 255, 0.4);
   transform: translateY(-3px);
   box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.discount-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--bad);
+  color: white;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(255, 77, 109, 0.4);
+  z-index: 2;
 }
 
 .product-img {
@@ -268,6 +283,15 @@ button, .btn {
   border-top: 1px solid var(--line);
 }
 
+.price-box {
+  display: flex;
+  flex-direction: column;
+}
+.old-price {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: line-through;
+}
 .product-price {
   font-size: 18px;
   font-weight: 800;
@@ -694,13 +718,17 @@ button, .btn {
       </div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
         <div class="field">
-          <label>Цена (₴) *</label>
+          <label>Цена со скидкой (₴) *</label>
           <input id="prodPrice" type="number" min="0" required placeholder="100">
         </div>
         <div class="field">
-          <label>В наличии (шт.) *</label>
-          <input id="prodStock" type="number" min="0" required placeholder="10">
+          <label>Старая цена (без скидки) (₴)</label>
+          <input id="prodOldPrice" type="number" min="0" placeholder="150">
         </div>
+      </div>
+      <div class="field">
+        <label>В наличии (шт.) *</label>
+        <input id="prodStock" type="number" min="0" required placeholder="10">
       </div>
       <div class="field">
         <label>Ссылка на фото (URL)</label>
@@ -841,7 +869,7 @@ function subscribeToMe() {
   });
 }
 
-// 1. PRODUCTS SHOP SYSTEM
+// 1. PRODUCTS SHOP SYSTEM WITH DISCOUNTS
 async function loadProducts() {
   const grid = $("productsGrid");
   try {
@@ -859,8 +887,13 @@ async function loadProducts() {
       const p = d.data();
       const stock = Number(p.stock || 0);
       const isAvailable = stock > 0;
+      const price = Number(p.price || 0);
+      const oldPrice = Number(p.oldPrice || 0);
+      const hasDiscount = oldPrice > price;
+
       return `
         <div class="product-card">
+          ${hasDiscount ? `<div class="discount-tag">СКИДКА</div>` : ''}
           ${p.imageUrl 
             ? `<img src="${p.imageUrl}" class="product-img" alt="${p.title}" onerror="this.style.display='none'">` 
             : `<div class="product-img">📦</div>`}
@@ -873,10 +906,13 @@ async function loadProducts() {
                 : `<span class="badge badge-bad">Нет в наличии</span>`}
             </div>
             <div class="product-meta">
-              <div class="product-price">${money(p.price)}</div>
+              <div class="price-box">
+                ${hasDiscount ? `<span class="old-price">${money(oldPrice)}</span>` : ''}
+                <span class="product-price">${money(price)}</span>
+              </div>
               <button class="btn btn-primary btn-sm" 
                 ${!isAvailable ? 'disabled' : ''} 
-                onclick="window.openBuyModal('${d.id}', '${p.title.replace(/'/g, "\\'")}', ${p.price})">
+                onclick="window.openBuyModal('${d.id}', '${p.title.replace(/'/g, "\\'")}', ${price})">
                 ${isAvailable ? 'Купить' : 'Продано'}
               </button>
             </div>
@@ -1099,7 +1135,6 @@ window.openOrderChat = (orderId) => {
     $("sendChatMessageBtn").disabled = isClosed;
     $("chatInputText").placeholder = isClosed ? "Чат закрыт (Заказ выполнен)" : "Напишите сообщение...";
     
-    // Показывать кнопку закрытия, пока заказ не закрыт
     $("closeOrderChatBtn").classList.toggle("hidden", isClosed);
 
     renderChatMessages(o.chatMessages || []);
@@ -1133,7 +1168,6 @@ $("closeChatModal").onclick = () => {
   $("chatModal").classList.remove("show");
 };
 
-// Подтверждение закрытия чата (Подтверждает выполнение заказа)
 $("closeOrderChatBtn").onclick = async () => {
   if (!activeChatOrderId) return toast("Ошибка: Чат не найден");
   
@@ -1251,7 +1285,7 @@ async function loadAdminData() {
     return `
       <div class="row-item">
         <div>
-          <strong>${p.title}</strong> — ${money(p.price)}
+          <strong>${p.title}</strong> — ${money(p.price)} ${p.oldPrice ? `<span class="old-price">(${money(p.oldPrice)})</span>` : ''}
           <div class="small">В наличии: ${p.stock} шт.</div>
         </div>
         <div>
@@ -1343,6 +1377,7 @@ $("productForm").onsubmit = async (e) => {
   const payload = {
     title: $("prodTitle").value.trim(),
     price: Number($("prodPrice").value),
+    oldPrice: $("prodOldPrice").value ? Number($("prodOldPrice").value) : null,
     stock: Number($("prodStock").value),
     imageUrl: $("prodImg").value.trim(),
     description: $("prodDesc").value.trim(),
@@ -1372,6 +1407,7 @@ window.editProduct = async (id) => {
   $("prodId").value = id;
   $("prodTitle").value = p.title || "";
   $("prodPrice").value = p.price || 0;
+  $("prodOldPrice").value = p.oldPrice || "";
   $("prodStock").value = p.stock || 0;
   $("prodImg").value = p.imageUrl || "";
   $("prodDesc").value = p.description || "";
