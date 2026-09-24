@@ -338,6 +338,13 @@ button, .btn {
   border: 1px solid var(--line);
   align-self: flex-end;
 }
+.chat-msg.system {
+  background: rgba(255, 183, 3, 0.1);
+  border: 1px solid rgba(255, 183, 3, 0.3);
+  color: var(--warn);
+  align-self: center;
+  text-align: center;
+}
 .chat-msg .sender { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
 
 /* Auth Page */
@@ -1017,11 +1024,11 @@ async function loadHistory() {
 
       ordersContainer.innerHTML = docs.map(o => {
         const statusBadge = o.status === "completed" 
-          ? `<span class="badge badge-ok">✅ Выдано</span>`
+          ? `<span class="badge badge-ok">✅ Выполнено</span>`
           : o.status === "cancelled"
           ? `<span class="badge badge-bad">❌ Отменено</span>`
           : o.status === "closed"
-          ? `<span class="badge badge-bad">🔒 Чат закрыт</span>`
+          ? `<span class="badge badge-ok">🔒 Завершено и закрыто</span>`
           : `<span class="badge badge-warn">⏳ Ожидает выдачи</span>`;
 
         return `
@@ -1090,7 +1097,9 @@ window.openOrderChat = (orderId) => {
     const isClosed = o.status === "closed" || o.status === "completed" || o.status === "cancelled";
     $("chatInputText").disabled = isClosed;
     $("sendChatMessageBtn").disabled = isClosed;
-    $("chatInputText").placeholder = isClosed ? "Чат закрыт" : "Напишите сообщение...";
+    $("chatInputText").placeholder = isClosed ? "Чат закрыт (Заказ выполнен)" : "Напишите сообщение...";
+    
+    // Показывать кнопку закрытия, пока заказ не закрыт
     $("closeOrderChatBtn").classList.toggle("hidden", isClosed);
 
     renderChatMessages(o.chatMessages || []);
@@ -1108,8 +1117,9 @@ function renderChatMessages(msgs) {
 
   box.innerHTML = msgs.map(m => {
     const isAdmin = m.sender === "Админ" || m.role === "admin";
+    const isSys = m.sender === "Система";
     return `
-      <div class="chat-msg ${isAdmin ? 'admin' : 'user'}">
+      <div class="chat-msg ${isSys ? 'system' : isAdmin ? 'admin' : 'user'}">
         <div class="sender">${m.sender} [${m.time || ''}]</div>
         <div>${m.text}</div>
       </div>
@@ -1123,23 +1133,26 @@ $("closeChatModal").onclick = () => {
   $("chatModal").classList.remove("show");
 };
 
+// Подтверждение закрытия чата (Подтверждает выполнение заказа)
 $("closeOrderChatBtn").onclick = async () => {
-  if (!activeChatOrderId) return;
-  if (!confirm("Вы уверены, что хотите закрыть чат по этому заказу?")) return;
+  if (!activeChatOrderId) return toast("Ошибка: Чат не найден");
+  
+  const ok = confirm("Вы действительно хотите закрыть чат?\n\nЭто подтвердит, что товар получен, заказ полностью выполнен и вопросов больше нет.");
+  if (!ok) return;
 
   try {
     const orderRef = doc(db, "orders", activeChatOrderId);
     await updateDoc(orderRef, {
-      status: "closed",
+      status: "completed",
       chatMessages: arrayUnion({
         sender: "Система",
-        text: "🔒 Чат по заказу был закрыт.",
+        text: "🔒 Чат закрыт. Сделка полностью выполнена и подтверждена!",
         time: new Date().toLocaleTimeString("uk-UA", { hour: '2-digit', minute: '2-digit' })
       })
     });
-    toast("Чат успешно закрыт!");
+    toast("Заказ выполнен и закрыт!");
   } catch(e) {
-    toast("Ошибка закрытия: " + e.message);
+    toast("Ошибка: " + e.message);
   }
 };
 
@@ -1222,8 +1235,8 @@ async function loadAdminData() {
             <button class="btn btn-primary btn-sm" onclick="window.completeOrder('${d.id}')">Выдать ✅</button>
             <button class="btn btn-danger btn-sm" onclick="window.cancelOrder('${d.id}', '${o.userId}',${o.price})">Отмена ❌</button>
           ` : `
-            <span class="badge ${o.status === 'completed' ? 'badge-ok' : 'badge-bad'}">
-              ${o.status === 'completed' ? 'Выдано' : o.status === 'closed' ? 'Закрыт' : 'Отменено'}
+            <span class="badge ${o.status === 'completed' || o.status === 'closed' ? 'badge-ok' : 'badge-bad'}">
+              ${o.status === 'completed' || o.status === 'closed' ? 'Выполнено' : 'Отменено'}
             </span>
           `}
         </div>
