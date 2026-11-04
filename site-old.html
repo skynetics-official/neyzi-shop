@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neyzi Shop</title>
+<style>
+:root{--bg:#090b10;--panel:#11151d;--panel2:#171c25;--line:#272e3a;--text:#f4f6fb;--muted:#98a2b3;--a:#7c5cff;--a2:#9b86ff;--ok:#45d483;--bad:#ff607c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% -10%,#4b35a044,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}.wrap{max-width:1050px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}.brand{font-weight:900;font-size:25px}.brand span{color:var(--a2)}button{font:inherit;cursor:pointer;border:0}.nav{display:flex;gap:8px;flex-wrap:wrap}.btn{padding:10px 14px;border-radius:11px;background:#202631;color:#edf0f5;border:1px solid var(--line)}.primary{background:var(--a);color:white;border:0}.primary:hover{background:var(--a2)}.hero,.panel,.authbox{background:linear-gradient(145deg,#151a24,#10141b);border:1px solid var(--line);border-radius:21px;padding:26px;margin-bottom:18px}.hero h1{font-size:38px;margin:0 0 7px}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.stat{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:18px}.stat b{font-size:27px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.pill{display:inline-block;border:1px solid #454d5c;border-radius:99px;padding:4px 9px;font-size:12px;color:#c5c9d4}.field{display:grid;gap:7px;margin:12px 0}.field input{width:100%;background:#0b0f15;border:1px solid #303846;border-radius:10px;padding:12px;color:white;outline:0}.actions{display:flex;gap:9px;justify-content:flex-end;margin-top:17px}.auth{min-height:70vh;display:grid;place-items:center}.authbox{width:min(470px,100%)}.authbox h1{margin-top:0}.hidden{display:none!important}.toast{position:fixed;right:20px;bottom:20px;background:#202733;border:1px solid #3a4352;padding:13px 16px;border-radius:12px;display:none}.toast.show{display:block}.empty{text-align:center;padding:30px;color:var(--muted)}.danger{background:#381a24;color:#ffabb9}.code{font-family:ui-monospace,monospace;background:#0b1016;border:1px dashed #495261;border-radius:9px;padding:7px 9px}.small{font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header id="header" class="hidden">
+ <div class="brand">Neyzi<span>Shop</span></div>
+ <div class="nav"><button class="btn" id="playerBtn">👤 Игрок</button><button class="btn hidden" id="adminBtn">🛠️ Админ</button><button class="btn" id="logoutBtn">Выйти</button></div>
+</header>
+
+<section id="auth" class="auth">
+<div class="authbox">
+ <div class="brand">Neyzi<span>Shop</span></div>
+ <h1 id="authTitle">Вход</h1>
+ <p class="muted" id="authSub">Войди в свой аккаунт.</p>
+ <div class="field"><label>Email</label><input id="email" type="email" placeholder="you@example.com"></div>
+ <div class="field"><label>Пароль</label><input id="password" type="password" placeholder="••••••••"></div>
+ <button class="btn primary" style="width:100%;padding:12px" id="authAction">Войти</button>
+ <button class="btn" style="width:100%;margin-top:9px" id="switchAuth">Создать аккаунт</button>
+ <p class="muted small" id="authNote">Новый аккаунт получает роль player.</p>
+</div>
+</section>
+
+<main id="app" class="hidden">
+<section id="playerPanel">
+ <div class="hero"><h1>Панель игрока</h1><p class="muted">Твой баланс, коды и история операций.</p></div>
+ <div class="grid">
+  <div class="stat"><div class="muted">Баланс</div><b id="playerBalance">0 ₴</b></div>
+  <div class="stat"><div class="muted">Аккаунт</div><b id="playerName">—</b></div>
+ </div>
+ <div class="panel"><h2>Промокод</h2><p class="muted">Введи код, который выдал администратор.</p><div class="actions"><input id="promoInput" class="field" style="margin:0;max-width:330px" placeholder="FRIEND500"><button class="btn primary" id="redeemBtn">Активировать</button></div></div>
+ <div class="panel"><h2>История</h2><div id="history" class="empty">Операций пока нет.</div></div>
+ <div class="panel"><h2>Награды</h2><div class="empty">Пока ничего нет.</div></div>
+</section>
+
+<section id="adminPanel" class="hidden">
+ <div class="hero"><h1>Админ-панель</h1><p class="muted">Управление игроками и кодами. Данные хранятся в Firebase.</p></div>
+ <div class="panel"><h2>Игроки</h2><div id="players"></div></div>
+ <div class="panel"><h2>Создать промокод</h2><div class="grid">
+  <div class="field"><label>Код</label><input id="newCode" placeholder="FRIEND500"></div>
+  <div class="field"><label>Сумма, ₴</label><input id="newAmount" type="number" min="1" placeholder="500"></div>
+ </div><button class="btn primary" id="createCodeBtn">Создать код</button></div>
+ <div class="panel"><h2>Промокоды</h2><div id="codes"></div></div>
+</section>
+</main>
+</div>
+<div id="toast" class="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, query, where, orderBy, limit, runTransaction, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyDZX77u5cWZvLeQ-TNhrCYd6YSXbPGMd7A",
+ authDomain:"neyzishop.firebaseapp.com",
+ projectId:"neyzishop",
+ storageBucket:"neyzishop.firebasestorage.app",
+ messagingSenderId:"782169963369",
+ appId:"1:782169963369:web:afd2eafb40156bb75fdbf8",
+ measurementId:"G-6DCWCJVJ5M"
+};
+const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
+const $=id=>document.getElementById(id);
+let isRegister=false,currentUser=null,currentRole=null;
+
+function toast(t){const x=$("toast");x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),2400)}
+function money(n){return Number(n||0).toLocaleString("uk-UA")+" ₴"}
+function showAuth(){ $("auth").classList.remove("hidden");$("header").classList.add("hidden");$("app").classList.add("hidden") }
+function showApp(){ $("auth").classList.add("hidden");$("header").classList.remove("hidden");$("app").classList.remove("hidden") }
+function setAuthMode(){ $("authTitle").textContent=isRegister?"Регистрация":"Вход";$("authSub").textContent=isRegister?"Создай аккаунт игрока.":"Войди в свой аккаунт.";$("authAction").textContent=isRegister?"Создать аккаунт":"Войти";$("switchAuth").textContent=isRegister?"У меня уже есть аккаунт":"Создать аккаунт"; }
+$("switchAuth").onclick=()=>{isRegister=!isRegister;setAuthMode()};
+$("authAction").onclick=async()=>{
+ const email=$("email").value.trim(),password=$("password").value;
+ if(!email||password.length<6)return toast("Нужен email и пароль минимум 6 символов");
+ try{
+  if(isRegister){
+   const c=await createUserWithEmailAndPassword(auth,email,password);
+   await setDoc(doc(db,"users",c.user.uid),{name:email.split("@")[0],role:"player",balance:0,createdAt:serverTimestamp()});
+   toast("Аккаунт создан");
+  }else await signInWithEmailAndPassword(auth,email,password);
+ }catch(e){toast(e.code?.replace("auth/","")||e.message)}
+};
+$("logoutBtn").onclick=()=>signOut(auth);
+$("playerBtn").onclick=()=>{$("playerPanel").classList.remove("hidden");$("adminPanel").classList.add("hidden");loadPlayer()};
+$("adminBtn").onclick=()=>{$("playerPanel").classList.add("hidden");$("adminPanel").classList.remove("hidden");loadAdmin()};
+
+async function getMe(){const s=await getDoc(doc(db,"users",currentUser.uid));return s.exists()?s.data():null}
+async function loadPlayer(){
+ const u=await getMe(); if(!u)return;
+ $("playerBalance").textContent=money(u.balance);$("playerName").textContent=u.name||currentUser.email;
+ const q=query(collection(db,"transactions"),where("userId","==",currentUser.uid),orderBy("createdAt","desc"),limit(30));
+ try{const ss=await getDocs(q);$("history").innerHTML=ss.empty?'<div class="empty">Операций пока нет.</div>':ss.docs.map(d=>{const x=d.data();return `<div class="row"><div><b>${x.text||"Операция"}</b><div class="muted small">${x.createdAt?.toDate?.().toLocaleString("uk-UA")||""}</div></div><b>${Number(x.amount)>=0?"+":""}${money(x.amount)}</b></div>`}).join("")}
+ catch(e){$("history").innerHTML='<div class="empty">История пока недоступна.</div>'}
+}
+$("redeemBtn").onclick=async()=>{
+ const code=$("promoInput").value.trim().toUpperCase();if(!code)return toast("Введи код");
+ const ref=doc(db,"promoCodes",code),userRef=doc(db,"users",currentUser.uid),txRef=doc(collection(db,"transactions"));
+ try{
+  await runTransaction(db,async t=>{
+   const [cs,us]=await Promise.all([t.get(ref),t.get(userRef)]);
+   if(!cs.exists())throw Error("Код не найден");
+   const c=cs.data();if(c.used)throw Error("Код уже использован");
+   const u=us.data();const amount=Number(c.amount);
+   t.update(userRef,{balance:Number(u.balance||0)+amount});
+   t.update(ref,{used:true,usedBy:currentUser.uid,usedAt:serverTimestamp()});
+   t.set(txRef,{userId:currentUser.uid,amount,text:"Пополнение по промокоду",code,createdAt:serverTimestamp()});
+  });
+  $("promoInput").value="";toast("Баланс пополнен");loadPlayer();
+ }catch(e){toast(e.message||"Не удалось активировать код")}
+};
+
+async function loadAdmin(){
+ const ps=await getDocs(collection(db,"users"));$("players").innerHTML=ps.docs.map(d=>{const x=d.data();return `<div class="row"><div><b>${x.name||d.id}</b><div class="muted small">${d.id} · ${x.role}</div></div><div><b>${money(x.balance)}</b> <button class="btn" onclick="window.changeBal('${d.id}')">Изменить</button></div></div>`}).join("");
+ const cs=await getDocs(collection(db,"promoCodes"));$("codes").innerHTML=cs.empty?'<div class="empty">Кодов пока нет.</div>':cs.docs.map(d=>{const x=d.data();return `<div class="row"><div><span class="code">${d.id}</span> <b>${money(x.amount)}</b><div class="muted small">${x.used?"Использован":"Активен"}</div></div>${x.used?"":"<button class='btn danger' onclick=\"window.delCode('"+d.id+"')\">Удалить</button>"}</div>`}).join("");
+}
+window.changeBal=async id=>{
+ const v=prompt("Изменение баланса. Введи число, например 500 или -200:");
+ if(v===null)return;const amount=Number(v);if(!Number.isFinite(amount))return toast("Неверная сумма");
+ try{
+  const r=doc(db,"users",id),s=await getDoc(r),u=s.data();await updateDoc(r,{balance:Number(u.balance||0)+amount});
+  await addDoc(collection(db,"transactions"),{userId:id,amount,text:"Изменение администратором",createdAt:serverTimestamp(),adminId:currentUser.uid});
+  toast("Баланс изменён");loadAdmin();
+ }catch(e){toast(e.message||"Ошибка")}
+};
+$("createCodeBtn").onclick=async()=>{
+ const code=$("newCode").value.trim().toUpperCase(),amount=Number($("newAmount").value);
+ if(!code||!Number.isFinite(amount)||amount<=0)return toast("Заполни код и сумму");
+ try{await setDoc(doc(db,"promoCodes",code),{amount,used:false,createdBy:currentUser.uid,createdAt:serverTimestamp()});$("newCode").value="";$("newAmount").value="";toast("Код создан");loadAdmin()}catch(e){toast(e.message||"Ошибка")}
+};
+window.delCode=async code=>{try{await deleteDoc(doc(db,"promoCodes",code));toast("Код удалён");loadAdmin()}catch(e){toast(e.message||"Ошибка")}};
+
+onAuthStateChanged(auth,async u=>{
+ currentUser=u;if(!u){showAuth();return}
+ try{
+  const me=await getMe();
+  if(!me){await setDoc(doc(db,"users",u.uid),{name:u.email.split("@")[0],role:"player",balance:0,createdAt:serverTimestamp()});currentRole="player"}else currentRole=me.role;
+  showApp();$("adminBtn").classList.toggle("hidden",currentRole!=="admin");$("playerPanel").classList.remove("hidden");$("adminPanel").classList.add("hidden");loadPlayer();
+ }catch(e){toast("Не удалось загрузить профиль: "+e.message)}
+});
+setAuthMode();
+</script>
+</body>
+</html>
